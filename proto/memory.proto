@@ -1,0 +1,147 @@
+syntax = "proto3";
+
+package memory.v1;
+
+import "google/protobuf/timestamp.proto";
+
+service MemoryGameService {
+  rpc JoinGame(JoinGameRequest) returns (JoinGameResponse);
+  rpc PlayMove(PlayMoveRequest) returns (PlayMoveResponse);
+  rpc GetBoardState(GetBoardStateRequest) returns (BoardState);
+  rpc SubscribeToUpdates(SubscribeRequest) returns (stream GameUpdate);
+
+  rpc ListGames(ListGamesRequest) returns (ListGamesResponse);
+  rpc GetGameStats(GetGameStatsRequest) returns (GetGameStatsResponse);
+}
+
+message GameConfig {
+  int32 rows = 1;
+  int32 cols = 2;
+  int32 max_players = 3;
+  int32 mismatch_hide_delay_ms = 4;
+}
+
+enum CellState {
+  CELL_STATE_UNSPECIFIED = 0;
+  HIDDEN = 1;
+  REVEALED = 2;
+  MATCHED = 3;
+}
+
+message CellView {
+  int32 row = 1;
+  int32 col = 2;
+  CellState state = 3;
+  string emoji = 4; // empty unless REVEALED or MATCHED
+}
+
+message BoardView {
+  int32 rows = 1;
+  int32 cols = 2;
+  repeated CellView cells = 3; // rows*cols entries
+}
+
+message PlayerInfo {
+  string player_id = 1;
+  string name = 2;
+  int32 score = 3;
+  int32 moves = 4;
+  double avg_response_ms = 5;
+}
+
+message BoardState {
+  string game_id = 1;
+  GameConfig config = 2;
+  bool lobby_open = 3;
+  bool game_started = 4;
+  bool game_over = 5;
+
+  string current_turn_player_id = 6;
+  repeated PlayerInfo players = 7;
+  BoardView board = 8;
+
+  string message = 9;
+  int64 seq = 10;
+}
+
+enum UpdateType {
+  UPDATE_TYPE_UNSPECIFIED = 0;
+  PLAYER_JOINED = 1;
+  GAME_STARTED = 2;
+  CARD_REVEALED = 3;
+  TURN_RESOLVED = 4;
+  TURN_CHANGED = 5;
+  GAME_OVER = 6;
+  ERROR = 7;
+}
+
+message GameUpdate {
+  UpdateType type = 1;
+  BoardState state = 2;
+  google.protobuf.Timestamp server_time = 3;
+}
+
+message JoinGameRequest {
+  string player_name = 1;
+}
+
+message JoinGameResponse {
+  string player_id = 1;
+  BoardState state = 2;
+}
+
+message PlayMoveRequest {
+  string player_id = 1;
+  int32 row = 2;
+  int32 col = 3;
+}
+
+message PlayMoveResponse {
+  bool ok = 1;
+  string message = 2;
+  BoardState state = 3;
+}
+
+message GetBoardStateRequest {
+  string player_id = 1;
+}
+
+message SubscribeRequest {
+  string player_id = 1;
+}
+
+message GameSummary {
+  string game_id = 1;
+  google.protobuf.Timestamp started_at = 2;
+  google.protobuf.Timestamp ended_at = 3;
+  int32 rows = 4;
+  int32 cols = 5;
+  int32 max_players = 6;
+  bool finished = 7;
+}
+
+message ListGamesRequest {
+  int32 limit = 1;
+}
+
+message ListGamesResponse {
+  repeated GameSummary games = 1;
+}
+
+message PlayerStats {
+  string player_id = 1;
+  string name = 2;
+  int32 score = 3;
+  int32 moves = 4;
+  double avg_response_ms = 5;
+  double total_response_ms = 6;
+}
+
+message GetGameStatsRequest {
+  string game_id = 1;
+}
+
+message GetGameStatsResponse {
+  GameSummary summary = 1;
+  repeated PlayerStats players = 2;
+}

@@ -1,0 +1,48 @@
+services:
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: memory
+    ports:
+      - "5432:5432"
+    volumes:
+      - memory_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d memory"]
+      interval: 2s
+      timeout: 5s
+      retries: 30
+
+  server:
+    build:
+      context: ..
+      dockerfile: deploy/server.Dockerfile
+    depends_on:
+      db:
+        condition: service_healthy
+    environment:
+      PYTHONUNBUFFERED: 1
+      MEMORY_HOST: 0.0.0.0
+      MEMORY_PORT: 50051
+      MEMORY_ROWS: 4
+      MEMORY_COLS: 4
+      MEMORY_PLAYERS: 3
+      MEMORY_MISMATCH_DELAY_MS: 1000
+      MEMORY_DB_DSN: postgresql://postgres:postgres@db:5432/memory
+    ports:
+      - "50051:50051"
+    restart: on-failure
+
+  client_console:
+    profiles: ["clients"]
+    build:
+      context: ..
+      dockerfile: deploy/client.Dockerfile
+    depends_on:
+      - server
+    entrypoint: ["python", "clients/console/main.py", "--host", "server", "--port", "50051"]
+
+volumes:
+  memory_pgdata:
