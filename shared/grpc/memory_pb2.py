@@ -25,17 +25,17 @@ _sym_db = _symbol_database.Default()
 from google.protobuf import timestamp_pb2 as google_dot_protobuf_dot_timestamp__pb2
 
 
-DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0cmemory.proto\x12\tmemory.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"]\n\nGameConfig\x12\x0c\n\x04rows\x18\x01 \x01(\x05\x12\x0c\n\x04\x63ols\x18\x02 \x01(\x05\x12\x13\n\x0bmax_players\x18\x03 \x01(\x05\x12\x1e\n\x16mismatch_hide_delay_ms\x18\x04 \x01(\x05\"X\n\x08\x43\x65llView\x12\x0b\n\x03row\x18\x01 \x01(\x05\x12\x0b\n\x03\x63ol\x18\x02 \x01(\x05\x12#\n\x05state\x18\x03 \x01(\x0e\x32\x14.memory.v1.CellState\x12\r\n\x05\x65moji\x18\x04 \x01(\t\"K\n\tBoardView\x12\x0c\n\x04rows\x18\x01 \x01(\x05\x12\x0c\n\x04\x63ols\x18\x02 \x01(\x05\x12\"\n\x05\x63\x65lls\x18\x03 \x03(\x0b\x32\x13.memory.v1.CellView\"d\n\nPlayerInfo\x12\x11\n\tplayer_id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\r\n\x05score\x18\x03 \x01(\x05\x12\r\n\x05moves\x18\x04 \x01(\x05\x12\x17\n\x0f\x61vg_response_ms\x18\x05 \x01(\x01\"\x8c\x02\n\nBoardState\x12\x0f\n\x07game_id\x18\x01 \x01(\t\x12%\n\x06\x63onfig\x18\x02 \x01(\x0b\x32\x15.memory.v1.GameConfig\x12\x12\n\nlobby_open\x18\x03 \x01(\x08\x12\x14\n\x0cgame_started\x18\x04 \x01(\x08\x12\x11\n\tgame_over\x18\x05 \x01(\x08\x12\x1e\n\x16\x63urrent_turn_player_id\x18\x06 \x01(\t\x12&\n\x07players\x18\x07 \x03(\x0b\x32\x15.memory.v1.PlayerInfo\x12#\n\x05\x62oard\x18\x08 \x01(\x0b\x32\x14.memory.v1.BoardView\x12\x0f\n\x07message\x18\t \x01(\t\x12\x0b\n\x03seq\x18\n \x01(\x03\"\x88\x01\n\nGameUpdate\x12#\n\x04type\x18\x01 \x01(\x0e\x32\x15.memory.v1.UpdateType\x12$\n\x05state\x18\x02 \x01(\x0b\x32\x15.memory.v1.BoardState\x12/\n\x0bserver_time\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\"&\n\x0fJoinGameRequest\x12\x13\n\x0bplayer_name\x18\x01 \x01(\t\"K\n\x10JoinGameResponse\x12\x11\n\tplayer_id\x18\x01 \x01(\t\x12$\n\x05state\x18\x02 \x01(\x0b\x32\x15.memory.v1.BoardState\">\n\x0fPlayMoveRequest\x12\x11\n\tplayer_id\x18\x01 \x01(\t\x12\x0b\n\x03row\x18\x02 \x01(\x05\x12\x0b\n\x03\x63ol\x18\x03 \x01(\x05\"U\n\x10PlayMoveResponse\x12\n\n\x02ok\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\x12$\n\x05state\x18\x03 \x01(\x0b\x32\x15.memory.v1.BoardState\")\n\x14GetBoardStateRequest\x12\x11\n\tplayer_id\x18\x01 \x01(\t\"%\n\x10SubscribeRequest\x12\x11\n\tplayer_id\x18\x01 \x01(\t\"\xbf\x01\n\x0bGameSummary\x12\x0f\n\x07game_id\x18\x01 \x01(\t\x12.\n\nstarted_at\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12,\n\x08\x65nded_at\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0c\n\x04rows\x18\x04 \x01(\x05\x12\x0c\n\x04\x63ols\x18\x05 \x01(\x05\x12\x13\n\x0bmax_players\x18\x06 \x01(\x05\x12\x10\n\x08\x66inished\x18\x07 \x01(\x08\"!\n\x10ListGamesRequest\x12\r\n\x05limit\x18\x01 \x01(\x05\":\n\x11ListGamesResponse\x12%\n\x05games\x18\x01 \x03(\x0b\x32\x16.memory.v1.GameSummary\"\x80\x01\n\x0bPlayerStats\x12\x11\n\tplayer_id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\r\n\x05score\x18\x03 \x01(\x05\x12\r\n\x05moves\x18\x04 \x01(\x05\x12\x17\n\x0f\x61vg_response_ms\x18\x05 \x01(\x01\x12\x19\n\x11total_response_ms\x18\x06 \x01(\x01\"&\n\x13GetGameStatsRequest\x12\x0f\n\x07game_id\x18\x01 \x01(\t\"h\n\x14GetGameStatsResponse\x12\'\n\x07summary\x18\x01 \x01(\x0b\x32\x16.memory.v1.GameSummary\x12\'\n\x07players\x18\x02 \x03(\x0b\x32\x16.memory.v1.PlayerStats*N\n\tCellState\x12\x1a\n\x16\x43\x45LL_STATE_UNSPECIFIED\x10\x00\x12\n\n\x06HIDDEN\x10\x01\x12\x0c\n\x08REVEALED\x10\x02\x12\x0b\n\x07MATCHED\x10\x03*\xa0\x01\n\nUpdateType\x12\x1b\n\x17UPDATE_TYPE_UNSPECIFIED\x10\x00\x12\x11\n\rPLAYER_JOINED\x10\x01\x12\x10\n\x0cGAME_STARTED\x10\x02\x12\x11\n\rCARD_REVEALED\x10\x03\x12\x11\n\rTURN_RESOLVED\x10\x04\x12\x10\n\x0cTURN_CHANGED\x10\x05\x12\r\n\tGAME_OVER\x10\x06\x12\t\n\x05\x45RROR\x10\x07\x32\xcb\x03\n\x11MemoryGameService\x12\x43\n\x08JoinGame\x12\x1a.memory.v1.JoinGameRequest\x1a\x1b.memory.v1.JoinGameResponse\x12\x43\n\x08PlayMove\x12\x1a.memory.v1.PlayMoveRequest\x1a\x1b.memory.v1.PlayMoveResponse\x12G\n\rGetBoardState\x12\x1f.memory.v1.GetBoardStateRequest\x1a\x15.memory.v1.BoardState\x12J\n\x12SubscribeToUpdates\x12\x1b.memory.v1.SubscribeRequest\x1a\x15.memory.v1.GameUpdate0\x01\x12\x46\n\tListGames\x12\x1b.memory.v1.ListGamesRequest\x1a\x1c.memory.v1.ListGamesResponse\x12O\n\x0cGetGameStats\x12\x1e.memory.v1.GetGameStatsRequest\x1a\x1f.memory.v1.GetGameStatsResponseb\x06proto3')
+DESCRIPTOR = _descriptor_pool.Default().AddSerializedFile(b'\n\x0cmemory.proto\x12\tmemory.v1\x1a\x1fgoogle/protobuf/timestamp.proto\"]\n\nGameConfig\x12\x0c\n\x04rows\x18\x01 \x01(\x05\x12\x0c\n\x04\x63ols\x18\x02 \x01(\x05\x12\x13\n\x0bmax_players\x18\x03 \x01(\x05\x12\x1e\n\x16mismatch_hide_delay_ms\x18\x04 \x01(\x05\"X\n\x08\x43\x65llView\x12\x0b\n\x03row\x18\x01 \x01(\x05\x12\x0b\n\x03\x63ol\x18\x02 \x01(\x05\x12#\n\x05state\x18\x03 \x01(\x0e\x32\x14.memory.v1.CellState\x12\r\n\x05\x65moji\x18\x04 \x01(\t\"K\n\tBoardView\x12\x0c\n\x04rows\x18\x01 \x01(\x05\x12\x0c\n\x04\x63ols\x18\x02 \x01(\x05\x12\"\n\x05\x63\x65lls\x18\x03 \x03(\x0b\x32\x13.memory.v1.CellView\"d\n\nPlayerInfo\x12\x11\n\tplayer_id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\r\n\x05score\x18\x03 \x01(\x05\x12\r\n\x05moves\x18\x04 \x01(\x05\x12\x17\n\x0f\x61vg_response_ms\x18\x05 \x01(\x01\"\x8c\x02\n\nBoardState\x12\x0f\n\x07game_id\x18\x01 \x01(\t\x12%\n\x06\x63onfig\x18\x02 \x01(\x0b\x32\x15.memory.v1.GameConfig\x12\x12\n\nlobby_open\x18\x03 \x01(\x08\x12\x14\n\x0cgame_started\x18\x04 \x01(\x08\x12\x11\n\tgame_over\x18\x05 \x01(\x08\x12\x1e\n\x16\x63urrent_turn_player_id\x18\x06 \x01(\t\x12&\n\x07players\x18\x07 \x03(\x0b\x32\x15.memory.v1.PlayerInfo\x12#\n\x05\x62oard\x18\x08 \x01(\x0b\x32\x14.memory.v1.BoardView\x12\x0f\n\x07message\x18\t \x01(\t\x12\x0b\n\x03seq\x18\n \x01(\x03\"\x88\x01\n\nGameUpdate\x12#\n\x04type\x18\x01 \x01(\x0e\x32\x15.memory.v1.UpdateType\x12$\n\x05state\x18\x02 \x01(\x0b\x32\x15.memory.v1.BoardState\x12/\n\x0bserver_time\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\"&\n\x0fJoinGameRequest\x12\x13\n\x0bplayer_name\x18\x01 \x01(\t\"K\n\x10JoinGameResponse\x12\x11\n\tplayer_id\x18\x01 \x01(\t\x12$\n\x05state\x18\x02 \x01(\x0b\x32\x15.memory.v1.BoardState\">\n\x0fPlayMoveRequest\x12\x11\n\tplayer_id\x18\x01 \x01(\t\x12\x0b\n\x03row\x18\x02 \x01(\x05\x12\x0b\n\x03\x63ol\x18\x03 \x01(\x05\"U\n\x10PlayMoveResponse\x12\n\n\x02ok\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\x12$\n\x05state\x18\x03 \x01(\x0b\x32\x15.memory.v1.BoardState\")\n\x14GetBoardStateRequest\x12\x11\n\tplayer_id\x18\x01 \x01(\t\"%\n\x10SubscribeRequest\x12\x11\n\tplayer_id\x18\x01 \x01(\t\"&\n\x11KickPlayerRequest\x12\x11\n\tplayer_id\x18\x01 \x01(\t\"W\n\x12KickPlayerResponse\x12\n\n\x02ok\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\x12$\n\x05state\x18\x03 \x01(\x0b\x32\x15.memory.v1.BoardState\"\x12\n\x10ResetGameRequest\"V\n\x11ResetGameResponse\x12\n\n\x02ok\x18\x01 \x01(\x08\x12\x0f\n\x07message\x18\x02 \x01(\t\x12$\n\x05state\x18\x03 \x01(\x0b\x32\x15.memory.v1.BoardState\"\xbf\x01\n\x0bGameSummary\x12\x0f\n\x07game_id\x18\x01 \x01(\t\x12.\n\nstarted_at\x18\x02 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12,\n\x08\x65nded_at\x18\x03 \x01(\x0b\x32\x1a.google.protobuf.Timestamp\x12\x0c\n\x04rows\x18\x04 \x01(\x05\x12\x0c\n\x04\x63ols\x18\x05 \x01(\x05\x12\x13\n\x0bmax_players\x18\x06 \x01(\x05\x12\x10\n\x08\x66inished\x18\x07 \x01(\x08\"!\n\x10ListGamesRequest\x12\r\n\x05limit\x18\x01 \x01(\x05\":\n\x11ListGamesResponse\x12%\n\x05games\x18\x01 \x03(\x0b\x32\x16.memory.v1.GameSummary\"\x80\x01\n\x0bPlayerStats\x12\x11\n\tplayer_id\x18\x01 \x01(\t\x12\x0c\n\x04name\x18\x02 \x01(\t\x12\r\n\x05score\x18\x03 \x01(\x05\x12\r\n\x05moves\x18\x04 \x01(\x05\x12\x17\n\x0f\x61vg_response_ms\x18\x05 \x01(\x01\x12\x19\n\x11total_response_ms\x18\x06 \x01(\x01\"&\n\x13GetGameStatsRequest\x12\x0f\n\x07game_id\x18\x01 \x01(\t\"h\n\x14GetGameStatsResponse\x12\'\n\x07summary\x18\x01 \x01(\x0b\x32\x16.memory.v1.GameSummary\x12\'\n\x07players\x18\x02 \x03(\x0b\x32\x16.memory.v1.PlayerStats*N\n\tCellState\x12\x1a\n\x16\x43\x45LL_STATE_UNSPECIFIED\x10\x00\x12\n\n\x06HIDDEN\x10\x01\x12\x0c\n\x08REVEALED\x10\x02\x12\x0b\n\x07MATCHED\x10\x03*\xc1\x01\n\nUpdateType\x12\x1b\n\x17UPDATE_TYPE_UNSPECIFIED\x10\x00\x12\x11\n\rPLAYER_JOINED\x10\x01\x12\x10\n\x0cGAME_STARTED\x10\x02\x12\x11\n\rCARD_REVEALED\x10\x03\x12\x11\n\rTURN_RESOLVED\x10\x04\x12\x10\n\x0cTURN_CHANGED\x10\x05\x12\r\n\tGAME_OVER\x10\x06\x12\t\n\x05\x45RROR\x10\x07\x12\x0f\n\x0bPLAYER_LEFT\x10\x08\x12\x0e\n\nGAME_RESET\x10\t2\xde\x04\n\x11MemoryGameService\x12\x43\n\x08JoinGame\x12\x1a.memory.v1.JoinGameRequest\x1a\x1b.memory.v1.JoinGameResponse\x12\x43\n\x08PlayMove\x12\x1a.memory.v1.PlayMoveRequest\x1a\x1b.memory.v1.PlayMoveResponse\x12G\n\rGetBoardState\x12\x1f.memory.v1.GetBoardStateRequest\x1a\x15.memory.v1.BoardState\x12J\n\x12SubscribeToUpdates\x12\x1b.memory.v1.SubscribeRequest\x1a\x15.memory.v1.GameUpdate0\x01\x12I\n\nKickPlayer\x12\x1c.memory.v1.KickPlayerRequest\x1a\x1d.memory.v1.KickPlayerResponse\x12\x46\n\tResetGame\x12\x1b.memory.v1.ResetGameRequest\x1a\x1c.memory.v1.ResetGameResponse\x12\x46\n\tListGames\x12\x1b.memory.v1.ListGamesRequest\x1a\x1c.memory.v1.ListGamesResponse\x12O\n\x0cGetGameStats\x12\x1e.memory.v1.GetGameStatsRequest\x1a\x1f.memory.v1.GetGameStatsResponseb\x06proto3')
 
 _globals = globals()
 _builder.BuildMessageAndEnumDescriptors(DESCRIPTOR, _globals)
 _builder.BuildTopDescriptorsAndMessages(DESCRIPTOR, 'memory_pb2', _globals)
 if not _descriptor._USE_C_DESCRIPTORS:
   DESCRIPTOR._loaded_options = None
-  _globals['_CELLSTATE']._serialized_start=1750
-  _globals['_CELLSTATE']._serialized_end=1828
-  _globals['_UPDATETYPE']._serialized_start=1831
-  _globals['_UPDATETYPE']._serialized_end=1991
+  _globals['_CELLSTATE']._serialized_start=1987
+  _globals['_CELLSTATE']._serialized_end=2065
+  _globals['_UPDATETYPE']._serialized_start=2068
+  _globals['_UPDATETYPE']._serialized_end=2261
   _globals['_GAMECONFIG']._serialized_start=60
   _globals['_GAMECONFIG']._serialized_end=153
   _globals['_CELLVIEW']._serialized_start=155
@@ -60,18 +60,26 @@ if not _descriptor._USE_C_DESCRIPTORS:
   _globals['_GETBOARDSTATEREQUEST']._serialized_end=1143
   _globals['_SUBSCRIBEREQUEST']._serialized_start=1145
   _globals['_SUBSCRIBEREQUEST']._serialized_end=1182
-  _globals['_GAMESUMMARY']._serialized_start=1185
-  _globals['_GAMESUMMARY']._serialized_end=1376
-  _globals['_LISTGAMESREQUEST']._serialized_start=1378
-  _globals['_LISTGAMESREQUEST']._serialized_end=1411
-  _globals['_LISTGAMESRESPONSE']._serialized_start=1413
-  _globals['_LISTGAMESRESPONSE']._serialized_end=1471
-  _globals['_PLAYERSTATS']._serialized_start=1474
-  _globals['_PLAYERSTATS']._serialized_end=1602
-  _globals['_GETGAMESTATSREQUEST']._serialized_start=1604
-  _globals['_GETGAMESTATSREQUEST']._serialized_end=1642
-  _globals['_GETGAMESTATSRESPONSE']._serialized_start=1644
-  _globals['_GETGAMESTATSRESPONSE']._serialized_end=1748
-  _globals['_MEMORYGAMESERVICE']._serialized_start=1994
-  _globals['_MEMORYGAMESERVICE']._serialized_end=2453
+  _globals['_KICKPLAYERREQUEST']._serialized_start=1184
+  _globals['_KICKPLAYERREQUEST']._serialized_end=1222
+  _globals['_KICKPLAYERRESPONSE']._serialized_start=1224
+  _globals['_KICKPLAYERRESPONSE']._serialized_end=1311
+  _globals['_RESETGAMEREQUEST']._serialized_start=1313
+  _globals['_RESETGAMEREQUEST']._serialized_end=1331
+  _globals['_RESETGAMERESPONSE']._serialized_start=1333
+  _globals['_RESETGAMERESPONSE']._serialized_end=1419
+  _globals['_GAMESUMMARY']._serialized_start=1422
+  _globals['_GAMESUMMARY']._serialized_end=1613
+  _globals['_LISTGAMESREQUEST']._serialized_start=1615
+  _globals['_LISTGAMESREQUEST']._serialized_end=1648
+  _globals['_LISTGAMESRESPONSE']._serialized_start=1650
+  _globals['_LISTGAMESRESPONSE']._serialized_end=1708
+  _globals['_PLAYERSTATS']._serialized_start=1711
+  _globals['_PLAYERSTATS']._serialized_end=1839
+  _globals['_GETGAMESTATSREQUEST']._serialized_start=1841
+  _globals['_GETGAMESTATSREQUEST']._serialized_end=1879
+  _globals['_GETGAMESTATSRESPONSE']._serialized_start=1881
+  _globals['_GETGAMESTATSRESPONSE']._serialized_end=1985
+  _globals['_MEMORYGAMESERVICE']._serialized_start=2264
+  _globals['_MEMORYGAMESERVICE']._serialized_end=2870
 # @@protoc_insertion_point(module_scope)

@@ -26,13 +26,36 @@ services:
       PYTHONUNBUFFERED: 1
       MEMORY_HOST: 0.0.0.0
       MEMORY_PORT: 50051
-      MEMORY_ROWS: 4
-      MEMORY_COLS: 4
+      MEMORY_ROWS: 8
+      MEMORY_COLS: 8
       MEMORY_PLAYERS: 3
       MEMORY_MISMATCH_DELAY_MS: 1000
       MEMORY_DB_DSN: postgresql://postgres:postgres@db:5432/memory
     ports:
       - "50051:50051"
+    restart: on-failure
+
+  gateway:
+    build:
+      context: ..
+      dockerfile: deploy/gateway.Dockerfile
+    depends_on:
+      - server
+    environment:
+      MEMORY_GRPC_HOST: server
+      MEMORY_GRPC_PORT: 50051
+    ports:
+      - "8000:8000"
+    restart: on-failure
+
+  web:
+    build:
+      context: ..
+      dockerfile: deploy/web.Dockerfile
+    depends_on:
+      - gateway
+    ports:
+      - "5173:80"
     restart: on-failure
 
   client_console:

@@ -9,6 +9,8 @@ service MemoryGameService {
   rpc PlayMove(PlayMoveRequest) returns (PlayMoveResponse);
   rpc GetBoardState(GetBoardStateRequest) returns (BoardState);
   rpc SubscribeToUpdates(SubscribeRequest) returns (stream GameUpdate);
+  rpc KickPlayer(KickPlayerRequest) returns (KickPlayerResponse);
+  rpc ResetGame(ResetGameRequest) returns (ResetGameResponse);
 
   rpc ListGames(ListGamesRequest) returns (ListGamesResponse);
   rpc GetGameStats(GetGameStatsRequest) returns (GetGameStatsResponse);
@@ -73,6 +75,8 @@ enum UpdateType {
   TURN_CHANGED = 5;
   GAME_OVER = 6;
   ERROR = 7;
+  PLAYER_LEFT = 8;
+  GAME_RESET = 9;
 }
 
 message GameUpdate {
@@ -108,6 +112,24 @@ message GetBoardStateRequest {
 
 message SubscribeRequest {
   string player_id = 1;
+}
+
+message KickPlayerRequest {
+  string player_id = 1;
+}
+
+message KickPlayerResponse {
+  bool ok = 1;
+  string message = 2;
+  BoardState state = 3;
+}
+
+message ResetGameRequest {}
+
+message ResetGameResponse {
+  bool ok = 1;
+  string message = 2;
+  BoardState state = 3;
 }
 
 message GameSummary {

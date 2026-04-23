@@ -54,6 +54,16 @@ class MemoryGameServiceStub(object):
                 request_serializer=memory__pb2.SubscribeRequest.SerializeToString,
                 response_deserializer=memory__pb2.GameUpdate.FromString,
                 _registered_method=True)
+        self.KickPlayer = channel.unary_unary(
+                '/memory.v1.MemoryGameService/KickPlayer',
+                request_serializer=memory__pb2.KickPlayerRequest.SerializeToString,
+                response_deserializer=memory__pb2.KickPlayerResponse.FromString,
+                _registered_method=True)
+        self.ResetGame = channel.unary_unary(
+                '/memory.v1.MemoryGameService/ResetGame',
+                request_serializer=memory__pb2.ResetGameRequest.SerializeToString,
+                response_deserializer=memory__pb2.ResetGameResponse.FromString,
+                _registered_method=True)
         self.ListGames = channel.unary_unary(
                 '/memory.v1.MemoryGameService/ListGames',
                 request_serializer=memory__pb2.ListGamesRequest.SerializeToString,
@@ -93,6 +103,18 @@ class MemoryGameServiceServicer(object):
         context.set_details('Method not implemented!')
         raise NotImplementedError('Method not implemented!')
 
+    def KickPlayer(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
+    def ResetGame(self, request, context):
+        """Missing associated documentation comment in .proto file."""
+        context.set_code(grpc.StatusCode.UNIMPLEMENTED)
+        context.set_details('Method not implemented!')
+        raise NotImplementedError('Method not implemented!')
+
     def ListGames(self, request, context):
         """Missing associated documentation comment in .proto file."""
         context.set_code(grpc.StatusCode.UNIMPLEMENTED)
@@ -127,6 +149,16 @@ def add_MemoryGameServiceServicer_to_server(servicer, server):
                     servicer.SubscribeToUpdates,
                     request_deserializer=memory__pb2.SubscribeRequest.FromString,
                     response_serializer=memory__pb2.GameUpdate.SerializeToString,
+            ),
+            'KickPlayer': grpc.unary_unary_rpc_method_handler(
+                    servicer.KickPlayer,
+                    request_deserializer=memory__pb2.KickPlayerRequest.FromString,
+                    response_serializer=memory__pb2.KickPlayerResponse.SerializeToString,
+            ),
+            'ResetGame': grpc.unary_unary_rpc_method_handler(
+                    servicer.ResetGame,
+                    request_deserializer=memory__pb2.ResetGameRequest.FromString,
+                    response_serializer=memory__pb2.ResetGameResponse.SerializeToString,
             ),
             'ListGames': grpc.unary_unary_rpc_method_handler(
                     servicer.ListGames,
@@ -247,6 +279,60 @@ class MemoryGameService(object):
             '/memory.v1.MemoryGameService/SubscribeToUpdates',
             memory__pb2.SubscribeRequest.SerializeToString,
             memory__pb2.GameUpdate.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def KickPlayer(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/memory.v1.MemoryGameService/KickPlayer',
+            memory__pb2.KickPlayerRequest.SerializeToString,
+            memory__pb2.KickPlayerResponse.FromString,
+            options,
+            channel_credentials,
+            insecure,
+            call_credentials,
+            compression,
+            wait_for_ready,
+            timeout,
+            metadata,
+            _registered_method=True)
+
+    @staticmethod
+    def ResetGame(request,
+            target,
+            options=(),
+            channel_credentials=None,
+            call_credentials=None,
+            insecure=False,
+            compression=None,
+            wait_for_ready=None,
+            timeout=None,
+            metadata=None):
+        return grpc.experimental.unary_unary(
+            request,
+            target,
+            '/memory.v1.MemoryGameService/ResetGame',
+            memory__pb2.ResetGameRequest.SerializeToString,
+            memory__pb2.ResetGameResponse.FromString,
             options,
             channel_credentials,
             insecure,

@@ -47,6 +47,22 @@ class MemoryService(memory_pb2_grpc.MemoryGameServiceServicer):
         finally:
             self._manager.unsubscribe(sub_id)
 
+    def KickPlayer(self, request: memory_pb2.KickPlayerRequest, context: grpc.ServicerContext):
+        outcome = self._manager.kick_player(request.player_id)
+        return memory_pb2.KickPlayerResponse(
+            ok=outcome.ok,
+            message=outcome.message,
+            state=outcome.state,
+        )
+
+    def ResetGame(self, request: memory_pb2.ResetGameRequest, context: grpc.ServicerContext):
+        outcome = self._manager.reset_game()
+        return memory_pb2.ResetGameResponse(
+            ok=outcome.ok,
+            message=outcome.message,
+            state=outcome.state,
+        )
+
     # Persistence-backed RPCs will be implemented after DB layer is added.
     def ListGames(self, request: memory_pb2.ListGamesRequest, context: grpc.ServicerContext):
         if self._store is None:
