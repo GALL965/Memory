@@ -62,6 +62,40 @@ class GameManager:
     def unsubscribe(self, sub_id: str) -> None:
         self._hub.remove(sub_id)
 
+    def _cancel_mismatch_timer(self) -> None:
+        if self._mismatch_timer is None:
+            return
+        try:
+            self._mismatch_timer.cancel()
+        except Exception:
+            pass
+        self._mismatch_timer = None
+
+    def _finalize_current_game_in_store(self) -> None:
+        if self._store is None:
+            return
+        players = summarize_players(self._state)
+        self._store.finalize_players(
+            self._state.game_id,
+            [
+                PlayerRow(
+                    player_id=p.player_id,
+                    name=p.name,
+                    score=p.score,
+                    moves=p.moves,
+                    avg_response_ms=p.avg_ms,
+                    total_response_ms=p.total_ms,
+                )
+                for p in players
+            ],
+        )
+        self._store.mark_game_finished(self._state.game_id)
+
+    def _create_fresh_state(self) -> GameState:
+        config = self._state.config
+        board = Board(config.rows, config.cols, default_emoji_pool())
+        return GameState(config=config, board=board)
+
     def _broadcast(self, update_type: int, message: str) -> None:
         with self._lock:
             self._state.bump_seq(message)
@@ -107,6 +141,66 @@ class GameManager:
     def get_state(self) -> memory_pb2.BoardState:
         with self._lock:
             return state_to_board_state(self._state)
+
+    def kick_player(self, player_id: str) -> MoveOutcome:
+        with self._lock:
+            self._cancel_mismatch_timer()
+            try:
+                message = self._state.remove_player(player_id)
+                self._state.bump_seq(message)
+                snapshot = state_to_board_state(self._state)
+                game_over_now = self._state.game_over
+            except Exception as exc:  # noqa: BLE001
+                self._state.bump_seq(str(exc))
+                snapshot = state_to_board_state(self._state)
+                return MoveOutcome(ok=False, message=str(exc), state=snapshot)
+
+        update_type = memory_pb2.GAME_OVER if game_over_now else memory_pb2.PLAYER_LEFT
+        self._hub.publish(
+            memory_pb2.GameUpdate(
+                type=update_type,
+                state=snapshot,
+                server_time=now_timestamp(),
+            )
+        )
+
+        if game_over_now:
+            print_final_stats(self._state)
+            self._finalize_current_game_in_store()
+
+        return MoveOutcome(ok=True, message=message, state=snapshot)
+
+    def reset_game(self) -> MoveOutcome:
+        with self._lock:
+            self._cancel_mismatch_timer()
+            old_started = self._state.game_started
+            old_finished = self._state.game_over
+
+            if self._store is not None and old_started and not old_finished:
+                self._finalize_current_game_in_store()
+
+            self._state = self._create_fresh_state()
+            self._state.bump_seq("Game reset by admin. Waiting for players...")
+            snapshot = state_to_board_state(self._state)
+
+            if self._store is not None:
+                cfg = self._state.config
+                self._store.create_game(
+                    game_id=self._state.game_id,
+                    rows=cfg.rows,
+                    cols=cfg.cols,
+                    max_players=cfg.max_players,
+                    mismatch_hide_delay_ms=cfg.mismatch_hide_delay_ms,
+                )
+
+        self._hub.publish(
+            memory_pb2.GameUpdate(
+                type=memory_pb2.GAME_RESET,
+                state=snapshot,
+                server_time=now_timestamp(),
+            )
+        )
+        return MoveOutcome(ok=True, message="Game reset", state=snapshot)
 
     def play_move(self, player_id: str, row: int, col: int) -> MoveOutcome:
         pos = Position(row=row, col=col)
@@ -255,11 +349,7 @@ class GameManager:
             )
 
         # Cancel any old timer (defensive)
-        if self._mismatch_timer is not None:
-            try:
-                self._mismatch_timer.cancel()
-            except Exception:
-                pass
+        self._cancel_mismatch_timer()
 
         self._mismatch_timer = threading.Timer(delay_s, _hide_and_advance)
         self._mismatch_timer.daemon = True

@@ -21,8 +21,8 @@ def load_config() -> ServerConfig:
     host = os.getenv("MEMORY_HOST", "0.0.0.0")
     port = int(os.getenv("MEMORY_PORT", "50051"))
 
-    rows = int(os.getenv("MEMORY_ROWS", "4"))
-    cols = int(os.getenv("MEMORY_COLS", "4"))
+    rows = int(os.getenv("MEMORY_ROWS", "8"))
+    cols = int(os.getenv("MEMORY_COLS", "8"))
     max_players = int(os.getenv("MEMORY_PLAYERS", "2"))
     mismatch_hide_delay_ms = int(os.getenv("MEMORY_MISMATCH_DELAY_MS", "1000"))
 

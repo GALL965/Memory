@@ -212,6 +212,47 @@ class GameState:
         self._turn_started_at = time.monotonic()
         self._first_pick = None
 
+    def remove_player(self, player_id: str) -> str:
+        if player_id not in self.players:
+            raise ValueError("Player not found")
+
+        removed = self.players[player_id]
+        removed_index = self.turn_order.index(player_id)
+
+        if self.phase == Phase.RESOLVING_MISMATCH:
+            # If a kick happens during mismatch resolution, clear transient reveals now.
+            self.board.clear_revealed()
+            self.phase = Phase.IN_TURN if self.game_started and not self.game_over else self.phase
+
+        if self._first_pick is not None and player_id == self.current_turn_player_id():
+            # Cancel partial turn state if we remove current player.
+            self.board.hide(self._first_pick)
+            self._first_pick = None
+
+        self.turn_order.pop(removed_index)
+        self.players.pop(player_id, None)
+
+        if not self.turn_order:
+            self.current_turn_index = 0
+            if self.game_started:
+                self.set_game_over()
+            return f"Player removed: {removed.name}. No players left."
+
+        if removed_index < self.current_turn_index:
+            self.current_turn_index -= 1
+        elif removed_index == self.current_turn_index:
+            if self.current_turn_index >= len(self.turn_order):
+                self.current_turn_index = 0
+            if self.game_started and not self.game_over:
+                self._turn_started_at = time.monotonic()
+                self._first_pick = None
+
+        if self.game_started and len(self.turn_order) == 1:
+            self.set_game_over()
+            return f"Player removed: {removed.name}. Game over: only one player remains."
+
+        return f"Player removed: {removed.name}"
+
     def set_game_over(self) -> None:
         self.game_over = True
         self.phase = Phase.GAME_OVER

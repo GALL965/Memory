@@ -22,8 +22,8 @@ pip install -r requirements.txt
 ```bash
 . .venv/bin/activate
 export MEMORY_PLAYERS=3
-export MEMORY_ROWS=4
-export MEMORY_COLS=4
+export MEMORY_ROWS=8
+export MEMORY_COLS=8
 python server/main.py
 ```
 
@@ -50,6 +50,20 @@ Desde la carpeta `deploy/`:
 ```bash
 docker compose -f deploy/docker-compose.yml up --build
 ```
+
+Esto levanta:
+
+- `db` (PostgreSQL)
+- `server` (gRPC)
+- `gateway` (HTTP/WebSocket -> gRPC)
+- `web` (React + Nginx)
+
+Frontend web:
+
+- URL: `http://localhost:5173`
+- Pantalla `Servidor`: monitoreo en vivo + historial/stats.
+- Pantalla `Clientes`: join y juego en tiempo real.
+- Pantalla `Servidor` incluye acciones admin: `Expulsar` jugador y `Reiniciar partida`.
 
 Para levantar clientes en contenedor (opcional):
 

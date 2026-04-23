@@ -3,7 +3,9 @@ FROM python:3.12-slim
 WORKDIR /app
 
 COPY requirements.txt /app/requirements.txt
-RUN pip install --no-cache-dir -r /app/requirements.txt
+COPY gateway/requirements.txt /app/gateway/requirements.txt
+
+RUN pip install --no-cache-dir -r /app/requirements.txt -r /app/gateway/requirements.txt
 
 COPY . /app
 
@@ -14,6 +16,6 @@ RUN python -m grpc_tools.protoc \
   /app/proto/memory.proto \
   && sed -i 's/^import memory_pb2 as memory__pb2$/from . import memory_pb2 as memory__pb2/' /app/shared/grpc/memory_pb2_grpc.py
 
-EXPOSE 50051
+EXPOSE 8000
 
-CMD ["python", "server/main.py"]
+CMD ["uvicorn", "gateway.main:app", "--host", "0.0.0.0", "--port", "8000"]
