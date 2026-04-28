@@ -123,16 +123,64 @@ class PostgresStore:
         turn_no: int,
         response_ms: float,
         matched: bool,
+        first_row: int | None = None,
+        first_col: int | None = None,
+        second_row: int | None = None,
+        second_col: int | None = None,
+        emoji1: str | None = None,
+        emoji2: str | None = None,
+        matched_pairs_before: int | None = None,
+        matched_pairs_after: int | None = None,
+        cards_remaining_before: int | None = None,
+        board_progress_pct_before: float | None = None,
+        player_score_before: int | None = None,
+        player_moves_before: int | None = None,
     ) -> None:
         gid = uuid.UUID(game_id)
         pid = uuid.UUID(player_id)
         with self._connect() as conn:
             conn.execute(
                 """
-                INSERT INTO turns(game_id, player_id, turn_no, response_ms, matched)
-                VALUES (%s, %s, %s, %s, %s)
+                INSERT INTO turns(
+                    game_id,
+                    player_id,
+                    turn_no,
+                    response_ms,
+                    matched,
+                    first_row,
+                    first_col,
+                    second_row,
+                    second_col,
+                    emoji1,
+                    emoji2,
+                    matched_pairs_before,
+                    matched_pairs_after,
+                    cards_remaining_before,
+                    board_progress_pct_before,
+                    player_score_before,
+                    player_moves_before
+                )
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)
                 """,
-                (gid, pid, turn_no, response_ms, matched),
+                (
+                    gid,
+                    pid,
+                    turn_no,
+                    response_ms,
+                    matched,
+                    first_row,
+                    first_col,
+                    second_row,
+                    second_col,
+                    emoji1,
+                    emoji2,
+                    matched_pairs_before,
+                    matched_pairs_after,
+                    cards_remaining_before,
+                    board_progress_pct_before,
+                    player_score_before,
+                    player_moves_before,
+                ),
             )
 
     def finalize_players(self, game_id: str, players: list[PlayerRow]) -> None:

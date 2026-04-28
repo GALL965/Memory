@@ -4,8 +4,11 @@ import { BoardGrid } from "../components/BoardGrid";
 import type { BoardState, GetGameStatsResponse, GameSummary } from "../types";
 import { useBoardStream } from "../useBoardStream";
 
+const BOARD_SIZE_OPTIONS = [4, 6, 8] as const;
+
 export function ServerScreen() {
   const [state, setState] = useState<BoardState | null>(null);
+  const [boardSize, setBoardSize] = useState<(typeof BOARD_SIZE_OPTIONS)[number]>(4);
   const [games, setGames] = useState<GameSummary[]>([]);
   const [stats, setStats] = useState<GetGameStatsResponse | null>(null);
   const [selectedGame, setSelectedGame] = useState<string>("");
@@ -19,12 +22,22 @@ export function ServerScreen() {
   useEffect(() => {
     if (latestUpdate?.state) {
       setState(latestUpdate.state);
+      const rows = latestUpdate.state.config?.rows;
+      if (rows === 4 || rows === 6 || rows === 8) {
+        setBoardSize(rows);
+      }
     }
   }, [latestUpdate]);
 
   useEffect(() => {
     fetchState()
-      .then((snapshot) => setState(snapshot))
+      .then((snapshot) => {
+        setState(snapshot);
+        const rows = snapshot.config?.rows;
+        if (rows === 4 || rows === 6 || rows === 8) {
+          setBoardSize(rows);
+        }
+      })
       .catch((fetchError) => {
         setError(fetchError instanceof Error ? fetchError.message : "No se pudo cargar estado");
       });
@@ -85,7 +98,7 @@ export function ServerScreen() {
     setAdminBusy("reset");
     setError(null);
     try {
-      const response = await resetGame();
+      const response = await resetGame(boardSize, boardSize);
       setState(response.state);
       if (!response.ok) {
         setError(response.message || "No se pudo reiniciar la partida");
@@ -111,6 +124,21 @@ export function ServerScreen() {
         <span className={`badge ${connected ? "ok" : "warn"}`}>
           {connected ? "Stream activo" : "Reconectando stream"}
         </span>
+        <label className="badge board-size-picker">
+          Tablero
+          <select
+            className="admin-select"
+            value={boardSize}
+            onChange={(event) => setBoardSize(Number(event.target.value) as (typeof BOARD_SIZE_OPTIONS)[number])}
+            disabled={adminBusy !== null}
+          >
+            {BOARD_SIZE_OPTIONS.map((size) => (
+              <option key={size} value={size}>
+                {size}x{size}
+              </option>
+            ))}
+          </select>
+        </label>
         <span className="badge">Partida: {state?.game_id?.slice(0, 8) || "N/A"}</span>
         <span className="badge">Turno: {state?.current_turn_player_id?.slice(0, 8) || "N/A"}</span>
         <button

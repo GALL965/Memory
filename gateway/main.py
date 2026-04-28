@@ -54,6 +54,11 @@ class KickPayload(BaseModel):
     player_id: str = Field(min_length=1)
 
 
+class ResetPayload(BaseModel):
+    rows: int | None = Field(default=None, ge=4, le=8)
+    cols: int | None = Field(default=None, ge=4, le=8)
+
+
 grpc_host = os.getenv("MEMORY_GRPC_HOST", "server")
 grpc_port = int(os.getenv("MEMORY_GRPC_PORT", "50051"))
 grpc_address = ServerAddress(grpc_host, grpc_port)
@@ -111,9 +116,14 @@ def kick_player(payload: KickPayload) -> dict[str, Any]:
 
 
 @app.post("/api/admin/reset")
-def reset_game() -> dict[str, Any]:
+def reset_game(payload: ResetPayload) -> dict[str, Any]:
     try:
-        response = grpc_stub.ResetGame(memory_pb2.ResetGameRequest())
+        response = grpc_stub.ResetGame(
+            memory_pb2.ResetGameRequest(
+                rows=payload.rows or 0,
+                cols=payload.cols or 0,
+            )
+        )
         return _as_dict(response)
     except grpc.RpcError as exc:
         raise _http_error_from_rpc(exc) from exc

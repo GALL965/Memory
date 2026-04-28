@@ -1,0 +1,25 @@
+{
+  "trained_at": "2026-04-28T00:07:59.609940+00:00",
+  "rows_used": 12,
+  "feature_columns": [
+    "turn_no",
+    "rows",
+    "cols",
+    "max_players",
+    "first_row",
+    "first_col",
+    "second_row",
+    "second_col",
+    "response_ms",
+    "matched_pairs_before",
+    "matched_pairs_after",
+    "cards_remaining_before",
+    "board_progress_pct_before",
+    "player_score_before",
+    "player_moves_before"
+  ],
+  "target_column": "matched",
+  "accuracy": 1.0,
+  "model": "RandomForestClassifier(n_estimators=100, random_state=42, max_depth=5)",
+  "csv_path": "dataset_turn_match_prediction.csv"
+}

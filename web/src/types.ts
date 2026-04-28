@@ -21,8 +21,16 @@ export interface PlayerInfo {
   avg_response_ms: number;
 }
 
+export interface GameConfig {
+  rows: number;
+  cols: number;
+  max_players: number;
+  mismatch_hide_delay_ms: number;
+}
+
 export interface BoardState {
   game_id: string;
+  config: GameConfig;
   lobby_open: boolean;
   game_started: boolean;
   game_over: boolean;

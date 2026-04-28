@@ -94,6 +94,18 @@ class Board:
     def all_matched(self) -> bool:
         return len(self._matched) == self.rows * self.cols
 
+    def count_matched_pairs(self) -> int:
+        return len(self._matched) // 2
+
+    def cards_remaining(self) -> int:
+        return (self.rows * self.cols) - len(self._matched)
+
+    def progress_pct(self) -> float:
+        total = self.rows * self.cols
+        if total == 0:
+            return 0.0
+        return (len(self._matched) / total) * 100.0
+
     def get_public_view(self) -> list[CellPublicView]:
         view: list[CellPublicView] = []
         for row in range(self.rows):

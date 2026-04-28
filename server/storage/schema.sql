@@ -41,7 +41,32 @@ CREATE TABLE IF NOT EXISTS turns (
   turn_no INT NOT NULL,
   response_ms DOUBLE PRECISION NOT NULL,
   matched BOOLEAN NOT NULL,
+  first_row INT,
+  first_col INT,
+  second_row INT,
+  second_col INT,
+  emoji1 TEXT,
+  emoji2 TEXT,
+  matched_pairs_before INT,
+  matched_pairs_after INT,
+  cards_remaining_before INT,
+  board_progress_pct_before DOUBLE PRECISION,
+  player_score_before INT,
+  player_moves_before INT,
   ts TIMESTAMPTZ NOT NULL DEFAULT NOW()
 );
+
+ALTER TABLE IF EXISTS turns ADD COLUMN IF NOT EXISTS first_row INT;
+ALTER TABLE IF EXISTS turns ADD COLUMN IF NOT EXISTS first_col INT;
+ALTER TABLE IF EXISTS turns ADD COLUMN IF NOT EXISTS second_row INT;
+ALTER TABLE IF EXISTS turns ADD COLUMN IF NOT EXISTS second_col INT;
+ALTER TABLE IF EXISTS turns ADD COLUMN IF NOT EXISTS emoji1 TEXT;
+ALTER TABLE IF EXISTS turns ADD COLUMN IF NOT EXISTS emoji2 TEXT;
+ALTER TABLE IF EXISTS turns ADD COLUMN IF NOT EXISTS matched_pairs_before INT;
+ALTER TABLE IF EXISTS turns ADD COLUMN IF NOT EXISTS matched_pairs_after INT;
+ALTER TABLE IF EXISTS turns ADD COLUMN IF NOT EXISTS cards_remaining_before INT;
+ALTER TABLE IF EXISTS turns ADD COLUMN IF NOT EXISTS board_progress_pct_before DOUBLE PRECISION;
+ALTER TABLE IF EXISTS turns ADD COLUMN IF NOT EXISTS player_score_before INT;
+ALTER TABLE IF EXISTS turns ADD COLUMN IF NOT EXISTS player_moves_before INT;
 
 CREATE INDEX IF NOT EXISTS turns_game_id_idx ON turns(game_id);

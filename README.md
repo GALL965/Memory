@@ -64,6 +64,7 @@ Frontend web:
 - Pantalla `Servidor`: monitoreo en vivo + historial/stats.
 - Pantalla `Clientes`: join y juego en tiempo real.
 - Pantalla `Servidor` incluye acciones admin: `Expulsar` jugador y `Reiniciar partida`.
+- Al reiniciar, puedes escoger tamaño de tablero: `4x4`, `6x6` o `8x8`.
 
 Para levantar clientes en contenedor (opcional):
 

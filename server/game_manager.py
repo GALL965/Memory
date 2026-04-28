@@ -22,8 +22,21 @@ class MoveOutcome:
     state: memory_pb2.BoardState
 
 
+@dataclass(slots=True)
+class TurnDatasetContext:
+    first_row: int
+    first_col: int
+    matched_pairs_before: int
+    cards_remaining_before: int
+    board_progress_pct_before: float
+    player_score_before: int
+    player_moves_before: int
+
+
 class GameManager:
     """Coordinates game state, concurrency and broadcasts."""
+
+    _ALLOWED_BOARD_SIZES = {4, 6, 8}
 
     def __init__(self, config: GameConfig, store: PostgresStore | None = None):
         self._lock = threading.Lock()
@@ -43,6 +56,7 @@ class GameManager:
 
         self._hub = SubscriberHub()
         self._mismatch_timer: threading.Timer | None = None
+        self._turn_dataset_contexts: dict[str, TurnDatasetContext] = {}
 
     @property
     def state(self) -> GameState:
@@ -91,8 +105,25 @@ class GameManager:
         )
         self._store.mark_game_finished(self._state.game_id)
 
-    def _create_fresh_state(self) -> GameState:
-        config = self._state.config
+    def _build_config_for_reset(self, rows: int | None, cols: int | None) -> GameConfig:
+        base = self._state.config
+        next_rows = rows if rows is not None else base.rows
+        next_cols = cols if cols is not None else base.cols
+
+        if next_rows != next_cols:
+            raise ValueError("Board must be square (rows == cols)")
+        if next_rows not in self._ALLOWED_BOARD_SIZES:
+            allowed = ", ".join(str(v) for v in sorted(self._ALLOWED_BOARD_SIZES))
+            raise ValueError(f"Board size must be one of: {allowed}")
+
+        return GameConfig(
+            rows=next_rows,
+            cols=next_cols,
+            max_players=base.max_players,
+            mismatch_hide_delay_ms=base.mismatch_hide_delay_ms,
+        )
+
+    def _create_fresh_state(self, config: GameConfig) -> GameState:
         board = Board(config.rows, config.cols, default_emoji_pool())
         return GameState(config=config, board=board)
 
@@ -147,6 +178,7 @@ class GameManager:
             self._cancel_mismatch_timer()
             try:
                 message = self._state.remove_player(player_id)
+                self._turn_dataset_contexts.pop(player_id, None)
                 self._state.bump_seq(message)
                 snapshot = state_to_board_state(self._state)
                 game_over_now = self._state.game_over
@@ -170,7 +202,7 @@ class GameManager:
 
         return MoveOutcome(ok=True, message=message, state=snapshot)
 
-    def reset_game(self) -> MoveOutcome:
+    def reset_game(self, rows: int | None = None, cols: int | None = None) -> MoveOutcome:
         with self._lock:
             self._cancel_mismatch_timer()
             old_started = self._state.game_started
@@ -179,7 +211,14 @@ class GameManager:
             if self._store is not None and old_started and not old_finished:
                 self._finalize_current_game_in_store()
 
-            self._state = self._create_fresh_state()
+            try:
+                next_cfg = self._build_config_for_reset(rows=rows, cols=cols)
+            except Exception as exc:  # noqa: BLE001
+                snapshot = state_to_board_state(self._state)
+                return MoveOutcome(ok=False, message=str(exc), state=snapshot)
+
+            self._state = self._create_fresh_state(next_cfg)
+            self._turn_dataset_contexts.clear()
             self._state.bump_seq("Game reset by admin. Waiting for players...")
             snapshot = state_to_board_state(self._state)
 
@@ -207,10 +246,32 @@ class GameManager:
 
         mismatch_to_hide: tuple[Position, Position] | None = None
         turn_result: TurnResult | None = None
+        turn_dataset_context: TurnDatasetContext | None = None
+        matched_pairs_after: int | None = None
 
         with self._lock:
             try:
+                if player_id in self._state.players:
+                    player = self._state.players[player_id]
+                    turn_dataset_context = TurnDatasetContext(
+                        first_row=row,
+                        first_col=col,
+                        matched_pairs_before=self._state.board.count_matched_pairs(),
+                        cards_remaining_before=self._state.board.cards_remaining(),
+                        board_progress_pct_before=self._state.board.progress_pct(),
+                        player_score_before=player.score,
+                        player_moves_before=player.moves,
+                    )
+
                 message, turn_result, mismatch_to_hide = self._state.pick(player_id, pos)
+                if turn_result is None and turn_dataset_context is not None:
+                    self._turn_dataset_contexts[player_id] = turn_dataset_context
+                if turn_result is not None:
+                    turn_dataset_context = self._turn_dataset_contexts.pop(
+                        player_id,
+                        turn_dataset_context,
+                    )
+                    matched_pairs_after = self._state.board.count_matched_pairs()
                 # After every pick we push an update.
                 self._state.bump_seq(message)
                 snapshot = state_to_board_state(self._state)
@@ -266,6 +327,38 @@ class GameManager:
                     turn_no=turn_result.turn_no,
                     response_ms=turn_result.response_ms,
                     matched=True,
+                    first_row=turn_result.pos1.row,
+                    first_col=turn_result.pos1.col,
+                    second_row=turn_result.pos2.row,
+                    second_col=turn_result.pos2.col,
+                    emoji1=turn_result.emoji1,
+                    emoji2=turn_result.emoji2,
+                    matched_pairs_before=(
+                        turn_dataset_context.matched_pairs_before
+                        if turn_dataset_context is not None
+                        else None
+                    ),
+                    matched_pairs_after=matched_pairs_after,
+                    cards_remaining_before=(
+                        turn_dataset_context.cards_remaining_before
+                        if turn_dataset_context is not None
+                        else None
+                    ),
+                    board_progress_pct_before=(
+                        turn_dataset_context.board_progress_pct_before
+                        if turn_dataset_context is not None
+                        else None
+                    ),
+                    player_score_before=(
+                        turn_dataset_context.player_score_before
+                        if turn_dataset_context is not None
+                        else None
+                    ),
+                    player_moves_before=(
+                        turn_dataset_context.player_moves_before
+                        if turn_dataset_context is not None
+                        else None
+                    ),
                 )
 
             update_type = memory_pb2.GAME_OVER if self._state.game_over else memory_pb2.TURN_CHANGED
@@ -314,6 +407,38 @@ class GameManager:
                 turn_no=turn_result.turn_no,
                 response_ms=turn_result.response_ms,
                 matched=False,
+                first_row=turn_result.pos1.row,
+                first_col=turn_result.pos1.col,
+                second_row=turn_result.pos2.row,
+                second_col=turn_result.pos2.col,
+                emoji1=turn_result.emoji1,
+                emoji2=turn_result.emoji2,
+                matched_pairs_before=(
+                    turn_dataset_context.matched_pairs_before
+                    if turn_dataset_context is not None
+                    else None
+                ),
+                matched_pairs_after=matched_pairs_after,
+                cards_remaining_before=(
+                    turn_dataset_context.cards_remaining_before
+                    if turn_dataset_context is not None
+                    else None
+                ),
+                board_progress_pct_before=(
+                    turn_dataset_context.board_progress_pct_before
+                    if turn_dataset_context is not None
+                    else None
+                ),
+                player_score_before=(
+                    turn_dataset_context.player_score_before
+                    if turn_dataset_context is not None
+                    else None
+                ),
+                player_moves_before=(
+                    turn_dataset_context.player_moves_before
+                    if turn_dataset_context is not None
+                    else None
+                ),
             )
 
         self._hub.publish(

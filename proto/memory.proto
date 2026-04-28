@@ -124,7 +124,10 @@ message KickPlayerResponse {
   BoardState state = 3;
 }
 
-message ResetGameRequest {}
+message ResetGameRequest {
+  int32 rows = 1;
+  int32 cols = 2;
+}
 
 message ResetGameResponse {
   bool ok = 1;

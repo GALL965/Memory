@@ -57,10 +57,13 @@ export function kickPlayer(playerId: string): Promise<AdminActionResponse> {
   });
 }
 
-export function resetGame(): Promise<AdminActionResponse> {
+export function resetGame(rows?: number, cols?: number): Promise<AdminActionResponse> {
   return request<AdminActionResponse>("/api/admin/reset", {
     method: "POST",
-    body: JSON.stringify({})
+    body: JSON.stringify({
+      rows,
+      cols
+    })
   });
 }
 

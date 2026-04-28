@@ -56,7 +56,9 @@ class MemoryService(memory_pb2_grpc.MemoryGameServiceServicer):
         )
 
     def ResetGame(self, request: memory_pb2.ResetGameRequest, context: grpc.ServicerContext):
-        outcome = self._manager.reset_game()
+        rows = request.rows if request.rows > 0 else None
+        cols = request.cols if request.cols > 0 else None
+        outcome = self._manager.reset_game(rows=rows, cols=cols)
         return memory_pb2.ResetGameResponse(
             ok=outcome.ok,
             message=outcome.message,
